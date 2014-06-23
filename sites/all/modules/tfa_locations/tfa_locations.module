@@ -1,0 +1,215 @@
+<?php
+
+/**
+ * @file
+ * Configures an API connection with Credly to award and display badges.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function tfa_locations_menu() {
+  $items['admin/tfa_locations/import'] = array(
+    'title' => 'Center Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tfa_locations_settings_form'),
+    'access arguments' => array('administer site settings'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Form constructor for the admin import page.
+ *
+ * @see tfa_locations_settings_form_submit().
+ */
+function tfa_locations_settings_form() {
+  $form = array();
+
+  $form['prefix'] = array(
+    '#title' => t('Welcome'),
+    '#prefix' => t("<p>This form allows the admin to import center data.</p>"),
+  );
+
+  $form['import'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Import'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#description' => t('Click here to begin import.')
+  );
+
+  $form['import']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler tfa_locations_settings_form().
+ *
+ */
+function tfa_locations_settings_form_submit($form, &$form_state) {
+  batch_tfa_locations_import_start();
+}
+
+/* 
+ * Retrieve center info and batch save as nodes.
+ *
+*/
+
+function batch_tfa_locations_import_start() {
+
+  $curl = curl_init();
+  $url = 'http://www.onedayallkids.org/api/programs/json';
+
+  curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+  curl_setopt($curl, CURLOPT_URL, $url);
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+
+  $result = curl_exec($curl);
+
+  $results_decoded = json_decode($result);
+
+  $operations = array();
+
+  foreach ($results_decoded->nodes as $object) {
+    
+    // Each operation is an array consisting of
+    // - The function to call.
+    // - An array of arguments to that function.
+    $operations[] = array(
+      'tfa_locations_batch', array($object->node),
+    );
+  }
+
+  $batch = array(
+    'operations' => $operations,
+    'finished' => 'tfa_locations_batch_import_finished',
+  );
+  //dpm($batch);
+
+  batch_set($batch);
+
+  //dpm($context);
+  return $batch;
+
+}
+
+/*
+ * Batch called function that will save info as new nodes
+ *
+ * @param array $node
+ *   The object to be checked/stored.
+*/
+function tfa_locations_batch($node, &$context) {
+
+  $region_tid = array_shift(taxonomy_get_term_by_name($node->program_region, 'locations'))->tid;
+  $type_tid = array_shift(taxonomy_get_term_by_name($node->program_type, 'program_types'))->tid;
+
+  // Check to see if a node with this title exists.
+  $nid = db_query("SELECT nid FROM {node} WHERE title LIKE :title", array(":title" => $node->title))->fetchField();  
+  if ($nid == NULL && $region_tid != NULL && $type_tid != NULL ) {
+
+    $new_node = (object) NULL;
+    $new_node->type = 'centers';
+    $new_node->title = check_plain($node->title);
+    $new_node->body['und'][0]['value'] = strip_tags($node->description);
+    $new_node->field_program_region['und'][0]['tid'] = $region_tid;
+    $new_node->field_program_type['und'][0]['tid'] = $type_tid;
+    $new_node->field_program_website['und'][0]['url'] = check_url($node->program_website);
+    $new_node->uid = 0;
+    $new_node->created = strtotime("now");
+    $new_node->changed = strtotime("now");
+    $new_node->status = 1;
+    $new_node->comment = 0;
+    $new_node->promote = 0;
+    $new_node->moderate = 0;
+    $new_node->sticky = 0;
+    $new_node->language = 'und';  
+
+    node_save($new_node);
+  }
+
+  return;
+}
+
+/**
+ * Batch finished.
+ * 
+ */
+
+function tfa_locations_batch_import_finished($success, $results, $operations) {
+  // The 'success' parameter means no fatal PHP errors were detected. All
+  // other error management should be handled using 'results'.
+  if ($success) {
+    $message = t('Success! Centers have been updated.');
+  }
+  else {
+    $message = t('Finished with an error.');
+  }
+  drupal_set_message(check_plain($message));
+}
+
+/**
+ * Implements hook_views_api().
+ * 
+ */
+function tfa_locations_views_api() {
+  return array(
+    'api' => '3',
+    'path' => drupal_get_path('module', 'tfa_locations') . '/includes/views',
+    'template path' => drupal_get_path('module', 'tfa_locations') . '/themes',
+  );
+}
+
+
+/**
+ * Implements hook_views_pre_render().
+ * 
+ */
+function tfa_locations_views_pre_render(&$view) {
+  if ($view->name == "tfa_locations") { 
+
+    // Get exposed filter results and states in region.
+    $region_tid = $view->exposed_data['term_node_tid_depth'];
+    $prog_tid = $view->exposed_data['field_program_type_tid'];
+
+    $view->tax_data['region'] = '';
+    $view->tax_data['program'] = '';
+
+    if (is_numeric($region_tid)) {
+      $view->tax_data['region'] = taxonomy_term_load($region_tid)->name;
+    }
+    if (is_numeric($prog_tid)) {
+      $view->tax_data['program'] = taxonomy_term_load($prog_tid)->name;
+    } 
+
+    // Get all states that will be in the select and theme them as a list.
+    $states = array();
+
+    foreach ($view->result as $foo) {
+      $states[] = $foo->field_field_program_region[0]['rendered']['#markup'];
+    }
+
+    $state_list= array_unique($states);
+
+    $list = array(
+      'type' => 'ul',
+      'attributes' => array(
+        'id' => 'state-list',
+        'class' => 'clearfix',
+      ),
+      'items' => $state_list,
+    );
+    $view->tax_data['states'] = theme('item_list', $list);
+     
+    return $view;
+    
+  }
+  
+}

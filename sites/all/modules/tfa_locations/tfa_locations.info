@@ -1,0 +1,10 @@
+name = TFA Locations 
+description = Provides locations page
+core = 7.x
+package = TFA Locations
+dependencies[] = views
+dependencies[] = features
+dependencies[] = tfa_locations_feature
+scripts[] = js/tfa_locations.js
+stylesheets[all][] = css/tfa_locations.css
+

@@ -1,0 +1,154 @@
+:focus {
+  outline-color: transparent;
+  outline-style: none;
+}
+#locations-top-select {
+	width: 100%;
+	height: 400px;
+}
+.view-id-tfa_locations .view-filters {
+	width:30%;
+	float:left;
+}
+
+#region-map {
+	background-image: url('../images/program-map.png');
+	background-repeat: no-repeat;
+	width: 500px;
+	height: 340px;
+	float:left;
+	background-position: -1px 0px;
+
+}
+#region-map a {
+	outline: none;
+}
+
+
+body.map-active-west #region-map,
+#region-map.map-west {
+	background-position: -0px -352px;
+}
+
+body.map-active-mountain-west #region-map,
+#region-map.map-mountain-west {
+	background-position:  0 -1071px;
+}
+#region-map.map-midwest,
+body.map-active-midwest #region-map {
+	background-position:0px -1784px;
+}
+#region-map.map-southwest,
+body.map-active-southwest #region-map {
+	background-position: 0 -712px;
+}
+#region-map.map-east,
+body.map-active-east #region-map {
+	background-position: 0px -2146px;
+	;
+}
+#region-map.map-southeast,
+body.map-active-southeast #region-map {
+	background-position: -1px -1432px;
+}
+#region-map.map-new-england,
+body.map-active-new-england #region-map {
+	background-position: 0 -2511px;
+}
+
+#locations-bottom-results #avail-states {
+	width: 15%;
+	float: left;
+}
+#locations-bottom-results .view-content ul {
+	list-style: none;
+	margin: 0px;
+	padding:0px;
+}
+
+#locations-bottom-results .view-content ul li {
+	margin-left: 0px;
+	min-height: 120px;
+}
+
+#locations-bottom-results .view-content ul li .views-field-field-program-image {
+	float: left;
+	margin-right: 10px;
+}
+#locations-bottom-results .view-content {
+	width: 80%;
+	float: right;
+}
+#locations-bottom-results .view-content h3 {
+	font-weight: inherit;
+	font-size: 2em;
+	margin-top: .5em;
+}
+#state-list {
+	padding: 0px;
+	margin: 0px;
+	list-style: none;
+	font-size: 1.25em;
+	cursor: pointer;
+	color: #0071B3;
+	margin-top:20px;
+
+}
+#state-list li {
+	padding-bottom: .75em;
+	padding: 10px;
+	text-align: center;
+	border-bottom: 1px solid #fff;
+	background: #EEE;
+}
+#state-list li:hover {
+	background: #F5F5F5;
+}
+
+@media only screen and (max-width: 799px)  {
+
+	#map-container {
+		width: 100%;
+	}
+	#region-map {
+		width: 500px;
+		margin: 20px auto;
+		float: none;
+	}
+	#locations-bottom-results #avail-states {
+		width: 100%;
+		min-height: 0px;
+		float: left;
+	}
+
+	#locations-bottom-results .view-content {
+		width: 100%;
+		float: right;
+	}
+	.view-id-tfa_locations .view-filters
+	 {
+		width:100%;
+		float:none;
+	}
+	.views-exposed-widget {
+		width: none;
+	}
+	#state-list li {
+		text-align: center;
+	}
+}
+@media only screen and (max-width: 520px)  {
+
+	#region-map,
+	#map-container {
+		display: none;
+	}
+	#locations-top-select {
+		width: 100%;
+		height: 100%;
+	}
+	.views-exposed-widget {
+		width:100%;
+		float:none;
+	}
+}
