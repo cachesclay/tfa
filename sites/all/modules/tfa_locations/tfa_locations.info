@@ -8,4 +8,3 @@ dependencies[] = link
 dependencies[] = tfa_locations_feature
 scripts[] = js/tfa_locations.js
 stylesheets[all][] = css/tfa_locations.css
-

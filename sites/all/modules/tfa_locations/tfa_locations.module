@@ -106,10 +106,10 @@ function batch_tfa_locations_import_start() {
 */
 function tfa_locations_batch($node, &$context) {
 
-  if (isset($node->program_region) {
+  if (isset($node->program_region)) {
     $region_tid = array_shift(taxonomy_get_term_by_name($node->program_region, 'locations'))->tid;
   }
-  if (isset($node->program_type) {
+  if (isset($node->program_type)) {
     $type_tid = array_shift(taxonomy_get_term_by_name($node->program_type, 'program_types'))->tid;
   }
   // Check to see if a node with this title exists.
