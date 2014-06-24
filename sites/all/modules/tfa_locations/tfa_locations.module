@@ -106,9 +106,12 @@ function batch_tfa_locations_import_start() {
 */
 function tfa_locations_batch($node, &$context) {
 
-  $region_tid = array_shift(taxonomy_get_term_by_name($node->program_region, 'locations'))->tid;
-  $type_tid = array_shift(taxonomy_get_term_by_name($node->program_type, 'program_types'))->tid;
-
+  if (isset($node->program_region) {
+    $region_tid = array_shift(taxonomy_get_term_by_name($node->program_region, 'locations'))->tid;
+  }
+  if (isset($node->program_type) {
+    $type_tid = array_shift(taxonomy_get_term_by_name($node->program_type, 'program_types'))->tid;
+  }
   // Check to see if a node with this title exists.
   $nid = db_query("SELECT nid FROM {node} WHERE title LIKE :title", array(":title" => $node->title))->fetchField();  
   if ($nid == NULL && $region_tid != NULL && $type_tid != NULL ) {
