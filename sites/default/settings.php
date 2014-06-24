@@ -608,7 +608,6 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 /**
  * 
  * #2: mongodb_debug
-
  * A variable primarily for developers, mongodb_debug causes a collection
  * to return a mongoDebugCollection and mongoDebugCursor instead of their
  * normal equivalents. If not defined, defaults to FALSE.

@@ -91,11 +91,9 @@ function batch_tfa_locations_import_start() {
     'operations' => $operations,
     'finished' => 'tfa_locations_batch_import_finished',
   );
-  //dpm($batch);
 
   batch_set($batch);
 
-  //dpm($context);
   return $batch;
 
 }
@@ -134,15 +132,13 @@ function tfa_locations_batch($node, &$context) {
 
     node_save($new_node);
   }
-
   return;
-}
+} 
 
 /**
  * Batch finished.
  * 
  */
-
 function tfa_locations_batch_import_finished($success, $results, $operations) {
   // The 'success' parameter means no fatal PHP errors were detected. All
   // other error management should be handled using 'results'.
@@ -163,7 +159,7 @@ function tfa_locations_views_api() {
   return array(
     'api' => '3',
     'path' => drupal_get_path('module', 'tfa_locations') . '/includes/views',
-    'template path' => drupal_get_path('module', 'tfa_locations') . '/themes',
+    'template path' => drupal_get_path('module', 'tfa_locations') . '/theme',
   );
 }
 
@@ -196,7 +192,7 @@ function tfa_locations_views_pre_render(&$view) {
       $states[] = $foo->field_field_program_region[0]['rendered']['#markup'];
     }
 
-    $state_list= array_unique($states);
+    $state_list = array_unique($states);
 
     $list = array(
       'type' => 'ul',
